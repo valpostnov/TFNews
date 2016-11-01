@@ -3,10 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/list_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="?colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"/>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/news_list"
@@ -23,5 +31,6 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical|center_horizontal"
         android:text="@string/news_empty_view"
+        android:layout_marginTop="?actionBarSize"
         android:visibility="gone"/>
 </FrameLayout>

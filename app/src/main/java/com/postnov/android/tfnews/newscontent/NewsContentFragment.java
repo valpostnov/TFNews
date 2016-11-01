@@ -2,6 +2,7 @@ package com.postnov.android.tfnews.newscontent;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
     private int contentId;
 
     @BindView(R.id.tv_news_content) TextView tvNewsContent;
+    @BindView(R.id.content_toolbar) Toolbar toolbar;
 
     @Override
     protected int getLayout() {
@@ -44,6 +46,7 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initToolbar();
         contentId = getArguments().getInt(CONTENT_ID);
         presenter = new NewsContentPresenter(App.get(this).repository());
     }
@@ -73,4 +76,10 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
 
     @Override
     public void showProgressView(boolean show) {}
+
+    private void initToolbar() {
+        toolbar.setTitle("Подробности");
+        toolbar.setNavigationIcon(R.drawable.ic_arrow);
+        toolbar.setNavigationOnClickListener(v -> navigationManager.openNewsList());
+    }
 }

@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.postnov.android.tfnews.App;
@@ -30,6 +31,7 @@ public class NewsFragment extends BaseFragment implements NewsView,
     @BindView(R.id.swipe_view)      SwipeRefreshLayout refreshLayout;
     @BindView(R.id.news_list)       RecyclerView rv;
     @BindView(R.id.news_empty_view) View emptyView;
+    @BindView(R.id.list_toolbar)    Toolbar toolbar;
 
     public static NewsFragment newInstance() {
         return new NewsFragment();
@@ -38,6 +40,7 @@ public class NewsFragment extends BaseFragment implements NewsView,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        toolbar.setTitle(R.string.app_name);
         presenter = new NewsPresenter(App.get(this).repository());
         newsAdapter = new NewsAdapter();
         newsAdapter.setOnItemClickListener(this);
