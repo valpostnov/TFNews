@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">TFNews</string>
+    <string name="app_name">Тинькофф новости</string>
+    <string name="news_empty_view">Нет новостей</string>
 </resources>

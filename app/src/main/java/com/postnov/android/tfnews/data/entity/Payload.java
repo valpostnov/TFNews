@@ -1,12 +1,14 @@
 package com.postnov.android.tfnews.data.entity;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by platon on 01.11.2016.
  */
 
-public class Payload {
+public class Payload implements Comparable<Payload> {
 
     @SerializedName("id")
     private int id;
@@ -76,5 +78,11 @@ public class Payload {
                 ", publicationDate=" + publicationDate +
                 ", bankInfoTypeId=" + bankInfoTypeId +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@NonNull Payload o) {
+        return this.publicationDate.getDate() < o.publicationDate.getDate() ? 1
+                : this.publicationDate.getDate() > o.publicationDate.getDate() ? 0 : 1;
     }
 }
