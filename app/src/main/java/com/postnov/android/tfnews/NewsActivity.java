@@ -31,7 +31,7 @@ public class NewsActivity extends AppCompatActivity implements NavigationManager
     @Override
     public void openNewsContent(int id) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, NewsContentFragment.newInstance(id))
+                .add(R.id.container, NewsContentFragment.newInstance(id))
                 .addToBackStack(null)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();

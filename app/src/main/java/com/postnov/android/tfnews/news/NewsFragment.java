@@ -18,6 +18,8 @@ import com.postnov.android.tfnews.news.interfaces.NewsView;
 import butterknife.BindView;
 import timber.log.Timber;
 
+import static com.postnov.android.tfnews.news.DividerItemDecoration.VERTICAL_LIST;
+
 /**
  * Created by platon on 01.11.2016.
  */
@@ -47,6 +49,7 @@ public class NewsFragment extends BaseFragment implements NewsView,
 
         rv.setAdapter(newsAdapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        rv.addItemDecoration(new DividerItemDecoration(getContext(), VERTICAL_LIST));
         refreshLayout.setOnRefreshListener(this);
     }
 
