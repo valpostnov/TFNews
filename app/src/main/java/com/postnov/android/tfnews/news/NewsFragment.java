@@ -15,8 +15,10 @@ import com.postnov.android.tfnews.base.BaseFragment;
 import com.postnov.android.tfnews.data.entity.News;
 import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
+import com.postnov.android.tfnews.util.NetworkConnectionException;
 
 import butterknife.BindView;
+import timber.log.Timber;
 
 import static com.postnov.android.tfnews.news.DividerItemDecoration.VERTICAL_LIST;
 
@@ -80,8 +82,12 @@ public class NewsFragment extends BaseFragment implements NewsView,
     }
 
     @Override
-    public void showError(String error) {
-        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+    public void showError(Throwable throwable) {
+        if (throwable instanceof NetworkConnectionException) {
+            Toast.makeText(getContext(), R.string.err_connection, Toast.LENGTH_SHORT).show();
+        } else {
+            Timber.wtf(throwable);
+        }
     }
 
     @Override
