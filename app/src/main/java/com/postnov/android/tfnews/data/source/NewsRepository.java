@@ -15,47 +15,48 @@ import rx.Observable;
 
 public class NewsRepository implements IDataSource {
 
-    private IDataSource remote;
-    private ICache<News> cache;
+    private IDataSource remoteDataSource;
+    private ICache<News> newsCache;
     private SparseArray<NewsContent> contentCache;
 
-    public NewsRepository(ICache<News> cache, IDataSource remote) {
-        this.remote = remote;
-        this.cache = cache;
+    public NewsRepository(ICache<News> newsCache, IDataSource remoteDataSource) {
+        this.remoteDataSource = remoteDataSource;
+        this.newsCache = newsCache;
         contentCache = new SparseArray<>();
     }
 
     @Override
     public Observable<News> getNews() {
 
-        if (cache.isEmpty()) {
+        if (newsCache.isEmpty()) {
             return getNewsFromRemote();
         }
 
-        return remote.getNews()
-                .filter(rem -> !rem.equals(cache.get()))
-                .doOnNext(news -> cache.put(news))
+        return remoteDataSource.getNews()
+                .onErrorResumeNext(getNewsFromCache())
+                .filter(news -> !news.equals(newsCache.get()))
+                .doOnNext(news -> newsCache.put(news))
                 .switchIfEmpty(getNewsFromCache());
     }
 
     @Override
     public Observable<NewsContent> getContent(int id) {
-        NewsContent nc = contentCache.get(id);
-        if (nc != null) {
-            return Observable.just(nc);
+        NewsContent newsContent = contentCache.get(id);
+        if (newsContent != null) {
+            return Observable.just(newsContent);
         }
 
-        return remote.getContent(id)
-                .doOnNext(newsContent -> contentCache.put(id, newsContent));
+        return remoteDataSource.getContent(id)
+                .doOnNext(content -> contentCache.put(id, content));
     }
 
     @NonNull
     private Observable<News> getNewsFromRemote() {
-        return remote.getNews().doOnNext(news -> cache.put(news));
+        return remoteDataSource.getNews().doOnNext(news -> newsCache.put(news));
     }
 
     @NonNull
     private Observable<News> getNewsFromCache() {
-        return Observable.just(cache.get());
+        return Observable.just(newsCache.get());
     }
 }

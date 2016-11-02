@@ -4,11 +4,15 @@ import com.postnov.android.tfnews.data.entity.NewsContent;
 import com.postnov.android.tfnews.data.source.IDataSource;
 import com.postnov.android.tfnews.newscontent.interfaces.INewsContentPresenter;
 import com.postnov.android.tfnews.newscontent.interfaces.NewsContentView;
+import com.postnov.android.tfnews.util.INetworkManager;
+import com.postnov.android.tfnews.util.NetworkManager;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+
+import static com.postnov.android.tfnews.util.INetworkManager.CONNECTION_ERR;
 
 /**
  * Created by platon on 01.11.2016.
@@ -19,18 +23,24 @@ public class NewsContentPresenter implements INewsContentPresenter {
     private NewsContentView newsContentView;
     private final CompositeSubscription subscription;
     private final IDataSource repository;
+    private final INetworkManager networkManager;
 
-    public NewsContentPresenter(IDataSource repository) {
+    public NewsContentPresenter(IDataSource repository, INetworkManager networkManager) {
         subscription = new CompositeSubscription();
         this.repository = repository;
+        this.networkManager = networkManager;
     }
 
     @Override
     public void fetchContent(int id) {
-        subscription.add(repository.getContent(id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(onNext, onError));
+        if (!networkManager.networkIsAvailable()) {
+            onError.call(new Exception(NetworkManager.CONNECTION_ERR));
+        } else {
+            subscription.add(repository.getContent(id)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(onNext, onError));
+        }
     }
 
     @Override
