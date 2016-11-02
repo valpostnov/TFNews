@@ -5,14 +5,13 @@ import com.postnov.android.tfnews.data.source.IDataSource;
 import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
 import com.postnov.android.tfnews.util.INetworkManager;
-import com.postnov.android.tfnews.util.NetworkManager;
+import com.postnov.android.tfnews.util.NetworkConnectionException;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-import static com.postnov.android.tfnews.util.INetworkManager.CONNECTION_ERR;
 
 /**
  * Created by platon on 01.11.2016.
@@ -45,7 +44,7 @@ public class NewsPresenter implements INewsPresenter {
     @Override
     public void fetchNews() {
         if (!networkManager.networkIsAvailable()) {
-            onError.call(new Exception(NetworkManager.CONNECTION_ERR));
+            onError.call(new NetworkConnectionException());
         }
 
         subscription.add(repository.getNews()
@@ -61,6 +60,6 @@ public class NewsPresenter implements INewsPresenter {
 
     private final Action1<Throwable> onError = e -> {
         newsView.showProgressView(false);
-        newsView.showError(e.getMessage());
+        newsView.showError(e);
     };
 }

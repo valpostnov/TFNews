@@ -5,6 +5,5 @@ package com.postnov.android.tfnews.util;
  */
 
 public interface INetworkManager {
-    String CONNECTION_ERR = "Отсутствует подключение к сети";
     boolean networkIsAvailable();
 }

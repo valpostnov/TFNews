@@ -15,9 +15,11 @@ import com.postnov.android.tfnews.base.BaseFragment;
 import com.postnov.android.tfnews.data.entity.NewsContent;
 import com.postnov.android.tfnews.newscontent.interfaces.INewsContentPresenter;
 import com.postnov.android.tfnews.newscontent.interfaces.NewsContentView;
+import com.postnov.android.tfnews.util.NetworkConnectionException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 /**
  * Created by platon on 01.11.2016.
@@ -75,9 +77,13 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
     }
 
     @Override
-    public void showError(String error) {
-        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-        btnRefresh.setVisibility(View.VISIBLE);
+    public void showError(Throwable throwable) {
+        if (throwable instanceof NetworkConnectionException) {
+            Toast.makeText(getContext(), R.string.err_connection, Toast.LENGTH_SHORT).show();
+            btnRefresh.setVisibility(View.VISIBLE);
+        } else {
+            Timber.wtf(throwable);
+        }
     }
 
     @Override
