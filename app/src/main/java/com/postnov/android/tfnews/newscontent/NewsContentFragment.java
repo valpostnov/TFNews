@@ -5,7 +5,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.postnov.android.tfnews.App;
 import com.postnov.android.tfnews.R;
@@ -15,7 +17,7 @@ import com.postnov.android.tfnews.newscontent.interfaces.INewsContentPresenter;
 import com.postnov.android.tfnews.newscontent.interfaces.NewsContentView;
 
 import butterknife.BindView;
-import timber.log.Timber;
+import butterknife.OnClick;
 
 /**
  * Created by platon on 01.11.2016.
@@ -28,6 +30,7 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
 
     @BindView(R.id.tv_news_content) TextView tvNewsContent;
     @BindView(R.id.content_toolbar) Toolbar toolbar;
+    @BindView(R.id.btn_refresh)     Button btnRefresh;
 
     @Override
     protected int getLayout() {
@@ -48,7 +51,9 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
         super.onViewCreated(view, savedInstanceState);
         initToolbar();
         contentId = getArguments().getInt(CONTENT_ID);
-        presenter = new NewsContentPresenter(App.get(this).repository());
+        presenter = new NewsContentPresenter(
+                App.get(this).repository(),
+                App.get(this).networkManager());
     }
 
     @Override
@@ -71,7 +76,8 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
 
     @Override
     public void showError(String error) {
-        Timber.e(error);
+        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        btnRefresh.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -81,5 +87,11 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
         toolbar.setTitle("Подробности");
         toolbar.setNavigationIcon(R.drawable.ic_arrow);
         toolbar.setNavigationOnClickListener(v -> navigationManager.openNewsList());
+    }
+
+    @OnClick(R.id.btn_refresh)
+    void onRefresh() {
+        btnRefresh.setVisibility(View.GONE);
+        presenter.fetchContent(contentId);
     }
 }

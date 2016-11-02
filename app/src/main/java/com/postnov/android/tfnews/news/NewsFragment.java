@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Toast;
 
 import com.postnov.android.tfnews.App;
 import com.postnov.android.tfnews.R;
@@ -16,7 +17,6 @@ import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
 
 import butterknife.BindView;
-import timber.log.Timber;
 
 import static com.postnov.android.tfnews.news.DividerItemDecoration.VERTICAL_LIST;
 
@@ -43,7 +43,9 @@ public class NewsFragment extends BaseFragment implements NewsView,
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         toolbar.setTitle(R.string.app_name);
-        presenter = new NewsPresenter(App.get(this).repository());
+        presenter = new NewsPresenter(
+                App.get(this).repository(),
+                App.get(this).networkManager());
         newsAdapter = new NewsAdapter();
         newsAdapter.setOnItemClickListener(this);
 
@@ -79,7 +81,7 @@ public class NewsFragment extends BaseFragment implements NewsView,
 
     @Override
     public void showError(String error) {
-        Timber.tag("NewsFragment").e(error);
+        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
     }
 
     @Override

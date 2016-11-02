@@ -11,6 +11,8 @@ import com.postnov.android.tfnews.data.source.local.ICache;
 import com.postnov.android.tfnews.data.source.local.JsonSerializer;
 import com.postnov.android.tfnews.data.source.local.NewsCache;
 import com.postnov.android.tfnews.data.source.remote.RemoteDataSource;
+import com.postnov.android.tfnews.util.INetworkManager;
+import com.postnov.android.tfnews.util.NetworkManager;
 
 import timber.log.Timber;
 
@@ -23,6 +25,7 @@ public class App extends Application {
     private IDataSource repository;
     private IDataSource remoteDataSource;
     private ICache<News> newsCache;
+    private INetworkManager networkManager;
 
     public static App get(Context context) {
         return (App) context.getApplicationContext();
@@ -39,6 +42,7 @@ public class App extends Application {
         newsCache = new NewsCache(getCacheDir(), new JsonSerializer());
         remoteDataSource = new RemoteDataSource();
         repository = new NewsRepository(newsCache, remoteDataSource);
+        networkManager = new NetworkManager(this);
     }
 
     public IDataSource repository() {
@@ -51,5 +55,9 @@ public class App extends Application {
 
     public ICache<News> newsCache() {
         return newsCache;
+    }
+
+    public INetworkManager networkManager() {
+        return networkManager;
     }
 }
