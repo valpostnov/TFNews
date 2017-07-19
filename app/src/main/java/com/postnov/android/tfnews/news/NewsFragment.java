@@ -15,10 +15,9 @@ import com.postnov.android.tfnews.base.BaseFragment;
 import com.postnov.android.tfnews.data.entity.News;
 import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
-import com.postnov.android.tfnews.util.NetworkConnectionException;
 
 import butterknife.BindView;
-import timber.log.Timber;
+import rx.Observable;
 
 import static com.postnov.android.tfnews.news.DividerItemDecoration.VERTICAL_LIST;
 
@@ -45,9 +44,8 @@ public class NewsFragment extends BaseFragment implements NewsView,
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         toolbar.setTitle(R.string.app_name);
-        presenter = new NewsPresenter(
-                App.get(this).repository(),
-                App.get(this).networkManager());
+
+        presenter = new NewsPresenter(new GetNewsInteractor(App.get(this).repository()));
         newsAdapter = new NewsAdapter();
         newsAdapter.setOnItemClickListener(this);
 
@@ -61,7 +59,6 @@ public class NewsFragment extends BaseFragment implements NewsView,
     public void onResume() {
         super.onResume();
         presenter.bind(this);
-        presenter.fetchNews();
     }
 
     @Override
@@ -76,18 +73,8 @@ public class NewsFragment extends BaseFragment implements NewsView,
     }
 
     @Override
-    public void showNews(News news) {
-        if (news != null) newsAdapter.swap(news.getPayload());
-        emptyView.setVisibility(newsAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
     public void showError(Throwable throwable) {
-        if (throwable instanceof NetworkConnectionException) {
-            Toast.makeText(getContext(), R.string.err_connection, Toast.LENGTH_SHORT).show();
-        } else {
-            Timber.wtf(throwable);
-        }
+
     }
 
     @Override
@@ -97,11 +84,33 @@ public class NewsFragment extends BaseFragment implements NewsView,
 
     @Override
     public void onRefresh() {
-        presenter.fetchNews();
+
     }
 
     @Override
     public void onItemClick(int id) {
         navigationManager.openNewsContent(id);
+    }
+
+    @Override
+    public Observable<Object> loadNewsIntent() {
+        return Observable.just(new Object());
+    }
+
+    @Override
+    public void render(NewsViewSate newsViewSate) {
+        if (newsViewSate instanceof NewsViewSate.LoadingState) {
+            refreshLayout.setRefreshing(true);
+        } else if (newsViewSate instanceof NewsViewSate.ErrorState) {
+            String error = ((NewsViewSate.ErrorState) newsViewSate).getError().getMessage();
+            Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        } else {
+            refreshLayout.setRefreshing(false);
+            News news = ((NewsViewSate.DataState) newsViewSate).getNews();
+            if (news != null) {
+                newsAdapter.swap(news.getPayload());
+            }
+            emptyView.setVisibility(newsAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+        }
     }
 }

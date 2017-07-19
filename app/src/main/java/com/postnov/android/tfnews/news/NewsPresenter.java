@@ -1,16 +1,9 @@
 package com.postnov.android.tfnews.news;
 
-import com.postnov.android.tfnews.data.entity.News;
-import com.postnov.android.tfnews.data.source.IDataSource;
 import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
-import com.postnov.android.tfnews.util.INetworkManager;
-import com.postnov.android.tfnews.util.NetworkConnectionException;
 
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 
 /**
@@ -19,47 +12,29 @@ import rx.subscriptions.CompositeSubscription;
 
 public class NewsPresenter implements INewsPresenter {
 
-    private final CompositeSubscription subscription;
-    private final IDataSource repository;
-    private final INetworkManager networkManager;
     private NewsView newsView;
+    private final GetNewsInteractor getNewsInteractor;
 
-    public NewsPresenter(IDataSource repository, INetworkManager networkManager) {
-        subscription = new CompositeSubscription();
-        this.repository = repository;
-        this.networkManager = networkManager;
+    public NewsPresenter(GetNewsInteractor getNewsInteractor) {
+        this.getNewsInteractor = getNewsInteractor;
     }
 
     @Override
     public void bind(NewsView view) {
         newsView = view;
+        bindIntents();
     }
 
     @Override
     public void unbind() {
-        subscription.clear();
         newsView = null;
     }
 
     @Override
-    public void fetchNews() {
-        if (!networkManager.networkIsAvailable()) {
-            onError.call(new NetworkConnectionException());
-        }
-
-        subscription.add(repository.getNews()
-                .subscribeOn(Schedulers.io())
+    public void bindIntents() {
+        newsView.loadNewsIntent()
+                .flatMap(getNewsInteractor::execute)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(onNext, onError));
+                .subscribe(newsView::render);
     }
-
-    private final Action1<News> onNext = news -> {
-        newsView.showProgressView(false);
-        newsView.showNews(news);
-    };
-
-    private final Action1<Throwable> onError = e -> {
-        newsView.showProgressView(false);
-        newsView.showError(e);
-    };
 }

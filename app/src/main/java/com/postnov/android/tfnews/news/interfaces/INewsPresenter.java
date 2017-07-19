@@ -7,5 +7,5 @@ import com.postnov.android.tfnews.base.BasePresenter;
  */
 
 public interface INewsPresenter extends BasePresenter<NewsView> {
-    void fetchNews();
+    void bindIntents();
 }
