@@ -5,6 +5,4 @@ package com.postnov.android.tfnews.base;
  */
 
 public interface BaseView {
-    void showError(Throwable throwable);
-    void showProgressView(boolean show);
 }

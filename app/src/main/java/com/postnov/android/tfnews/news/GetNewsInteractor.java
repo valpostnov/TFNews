@@ -16,7 +16,7 @@ public class GetNewsInteractor {
         this.newsRepository = newsRepository;
     }
 
-    Observable<NewsViewSate> execute(Object o) {
+    Observable<NewsViewSate> execute(Void aVoid) {
         return newsRepository.getNews()
                 .subscribeOn(Schedulers.io())
                 .map(NewsViewSate.DataState::new)

@@ -11,7 +11,9 @@ import rx.Observable;
 
 public interface NewsView extends BaseView {
 
-    Observable<Object> loadNewsIntent();
+    Observable<Void> loadNewsIntent();
+
+    Observable<Void> refreshIntent();
 
     void render(NewsViewSate newsViewSate);
 }

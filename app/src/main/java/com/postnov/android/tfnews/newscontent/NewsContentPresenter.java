@@ -16,7 +16,7 @@ import rx.subscriptions.CompositeSubscription;
  * Created by platon on 01.11.2016.
  */
 
-public class NewsContentPresenter implements INewsContentPresenter {
+public class NewsContentPresenter extends INewsContentPresenter {
 
     private NewsContentView newsContentView;
     private final CompositeSubscription subscription;
@@ -41,17 +41,6 @@ public class NewsContentPresenter implements INewsContentPresenter {
         }
     }
 
-    @Override
-    public void bind(NewsContentView view) {
-        newsContentView = view;
-    }
-
-    @Override
-    public void unbind() {
-        subscription.clear();
-        newsContentView = null;
-    }
-
     private final Action1<NewsContent> onNext = content -> {
         newsContentView.showProgressView(false);
         newsContentView.showContent(content);
@@ -61,4 +50,9 @@ public class NewsContentPresenter implements INewsContentPresenter {
         newsContentView.showProgressView(false);
         newsContentView.showError(e);
     };
+
+    @Override
+    protected void bindIntents() {
+
+    }
 }

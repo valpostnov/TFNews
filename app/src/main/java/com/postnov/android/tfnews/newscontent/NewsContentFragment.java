@@ -61,14 +61,14 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
     @Override
     public void onResume() {
         super.onResume();
-        presenter.bind(this);
+        presenter.attachView(this);
         presenter.fetchContent(contentId);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        presenter.unbind();
+        presenter.detachView(false);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
         tvNewsContent.setText(Html.fromHtml(content.getPayload().getContent()));
     }
 
-    @Override
+
     public void showError(Throwable throwable) {
         if (throwable instanceof NetworkConnectionException) {
             Toast.makeText(getContext(), R.string.err_connection, Toast.LENGTH_SHORT).show();
@@ -85,9 +85,6 @@ public class NewsContentFragment extends BaseFragment implements NewsContentView
             Timber.wtf(throwable);
         }
     }
-
-    @Override
-    public void showProgressView(boolean show) {}
 
     private void initToolbar() {
         toolbar.setTitle("Подробности");

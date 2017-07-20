@@ -9,10 +9,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
+import com.jakewharton.rxbinding.support.v4.widget.RxSwipeRefreshLayout;
 import com.postnov.android.tfnews.App;
 import com.postnov.android.tfnews.R;
 import com.postnov.android.tfnews.base.BaseFragment;
 import com.postnov.android.tfnews.data.entity.News;
+import com.postnov.android.tfnews.news.NewsViewSate.DataState;
+import com.postnov.android.tfnews.news.NewsViewSate.ErrorState;
+import com.postnov.android.tfnews.news.NewsViewSate.LoadingState;
 import com.postnov.android.tfnews.news.interfaces.INewsPresenter;
 import com.postnov.android.tfnews.news.interfaces.NewsView;
 
@@ -25,8 +29,7 @@ import static com.postnov.android.tfnews.news.DividerItemDecoration.VERTICAL_LIS
  * Created by platon on 01.11.2016.
  */
 
-public class NewsFragment extends BaseFragment implements NewsView,
-        SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
+public class NewsFragment extends BaseFragment implements NewsView, NewsAdapter.OnItemClickListener {
 
     private INewsPresenter presenter;
     private NewsAdapter newsAdapter;
@@ -52,19 +55,18 @@ public class NewsFragment extends BaseFragment implements NewsView,
         rv.setAdapter(newsAdapter);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         rv.addItemDecoration(new DividerItemDecoration(getContext(), VERTICAL_LIST));
-        refreshLayout.setOnRefreshListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        presenter.bind(this);
+        presenter.attachView(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        presenter.unbind();
+        presenter.detachView(true);
     }
 
     @Override
@@ -73,44 +75,46 @@ public class NewsFragment extends BaseFragment implements NewsView,
     }
 
     @Override
-    public void showError(Throwable throwable) {
-
-    }
-
-    @Override
-    public void showProgressView(boolean show) {
-        refreshLayout.setRefreshing(show);
-    }
-
-    @Override
-    public void onRefresh() {
-
-    }
-
-    @Override
     public void onItemClick(int id) {
         navigationManager.openNewsContent(id);
     }
 
     @Override
-    public Observable<Object> loadNewsIntent() {
-        return Observable.just(new Object());
+    public Observable<Void> loadNewsIntent() {
+        return Observable.just(null);
+    }
+
+    @Override
+    public Observable<Void> refreshIntent() {
+        return RxSwipeRefreshLayout.refreshes(refreshLayout);
     }
 
     @Override
     public void render(NewsViewSate newsViewSate) {
-        if (newsViewSate instanceof NewsViewSate.LoadingState) {
-            refreshLayout.setRefreshing(true);
-        } else if (newsViewSate instanceof NewsViewSate.ErrorState) {
-            String error = ((NewsViewSate.ErrorState) newsViewSate).getError().getMessage();
-            Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        if (newsViewSate instanceof LoadingState) {
+            renderLoading();
+        } else if (newsViewSate instanceof ErrorState) {
+            renderError((ErrorState) newsViewSate);
         } else {
-            refreshLayout.setRefreshing(false);
-            News news = ((NewsViewSate.DataState) newsViewSate).getNews();
-            if (news != null) {
-                newsAdapter.swap(news.getPayload());
-            }
-            emptyView.setVisibility(newsAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            renderData((DataState) newsViewSate);
         }
+    }
+
+    private void renderLoading() {
+        refreshLayout.setRefreshing(true);
+    }
+
+    private void renderError(ErrorState errorState) {
+        String error = errorState.getError().getMessage();
+        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+    }
+
+    private void renderData(DataState dataState) {
+        refreshLayout.setRefreshing(false);
+        News news = dataState.getNews();
+        if (news != null) {
+            newsAdapter.swap(news.getPayload());
+        }
+        emptyView.setVisibility(newsAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 }

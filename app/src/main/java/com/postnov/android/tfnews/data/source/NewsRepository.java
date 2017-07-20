@@ -28,15 +28,7 @@ public class NewsRepository implements IDataSource {
     @Override
     public Observable<News> getNews() {
 
-        if (newsCache.isEmpty()) {
-            return getNewsFromRemote();
-        }
-
-        return remoteDataSource.getNews()
-                .onErrorResumeNext(getNewsFromCache())
-                .filter(news -> !news.equals(newsCache.get()))
-                .doOnNext(news -> newsCache.put(news))
-                .switchIfEmpty(getNewsFromCache());
+        return getNewsFromCache().concatWith(getNewsFromRemote());
     }
 
     @Override
